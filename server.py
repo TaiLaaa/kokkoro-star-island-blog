@@ -59,6 +59,9 @@ class BlogApp:
                 updated_at TEXT NOT NULL,
                 published_at TEXT
             )""")
+            columns = {row[1] for row in db.execute("PRAGMA table_info(posts)")}
+            if "cover" not in columns:
+                db.execute("ALTER TABLE posts ADD COLUMN cover TEXT NOT NULL DEFAULT ''")
 
     def encode(self, obj):
         return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode()
@@ -139,7 +142,10 @@ class BlogApp:
         status = str(data.get("status", "draft"))
         if not title or not content or len(title) > 120 or len(category) > 40 or len(content) > 200000 or status not in ("draft", "published"):
             return None
-        return title, category, content, status
+        cover = str(data.get("cover", "")).strip()
+        if len(cover) > 300 or (cover and not cover.startswith("/assets/")):
+            return None
+        return title, category, content, status, cover
 
     def handle_api(self, method, path, body, headers):
         authed = self.authenticated(headers)
@@ -176,9 +182,9 @@ class BlogApp:
             if not data:
                 return self.response(422, {"error": "标题、分类、正文或状态无效"})
             now = datetime.now(timezone.utc).isoformat()
-            title, category, content, status = data
+            title, category, content, status, cover = data
             with self.connect() as db:
-                cur = db.execute("INSERT INTO posts(slug,title,category,content,status,created_at,updated_at,published_at) VALUES(NULL,?,?,?,?,?,?,?)", (title, category, content, status, now, now, now if status == "published" else None))
+                cur = db.execute("INSERT INTO posts(slug,title,category,content,status,created_at,updated_at,published_at,cover) VALUES(NULL,?,?,?,?,?,?,?,?)", (title, category, content, status, now, now, now if status == "published" else None, cover))
                 pid = cur.lastrowid
                 slug = f"post-{pid}"
                 db.execute("UPDATE posts SET slug=? WHERE id=?", (slug, pid))
@@ -201,10 +207,10 @@ class BlogApp:
                 data = self.validate_post(self.parse_json(body))
                 if not data:
                     return self.response(422, {"error": "标题、分类、正文或状态无效"})
-                title, category, content, status = data
+                title, category, content, status, cover = data
                 now = datetime.now(timezone.utc).isoformat()
                 published_at = old["published_at"] or (now if status == "published" else None)
-                db.execute("UPDATE posts SET title=?,category=?,content=?,status=?,updated_at=?,published_at=? WHERE id=?", (title, category, content, status, now, published_at, pid))
+                db.execute("UPDATE posts SET title=?,category=?,content=?,status=?,updated_at=?,published_at=?,cover=? WHERE id=?", (title, category, content, status, now, published_at, cover, pid))
                 row = db.execute("SELECT * FROM posts WHERE id=?", (pid,)).fetchone()
             return self.response(200, self.serialize(row))
         return self.response(404, {"error": "接口不存在"})
