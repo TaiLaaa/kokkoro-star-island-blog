@@ -11,6 +11,8 @@ __pycache__/
 *.bak*
 .DS_Store
 screenshots/
+node_modules/
+.wrangler/
 
 # Old generated demo audio retained only on the server
 assets/star-island*.wav

@@ -1,0 +1,14 @@
+name = "kokkoro-star-island-blog"
+main = "worker/src/index.js"
+compatibility_date = "2026-07-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kokkoro-star-island-blog"
+database_id = "8088d41d-1058-4b89-9874-de575c906b15"
+migrations_dir = "worker/migrations"

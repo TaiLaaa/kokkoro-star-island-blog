@@ -1,0 +1,12 @@
+{
+  "name": "kokkoro-star-island-blog",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test worker/test/*.test.js",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
