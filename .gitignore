@@ -12,5 +12,5 @@ __pycache__/
 .DS_Store
 screenshots/
 
-# Original/lossless generated audio retained only on the server
-assets/*.wav
+# Old generated demo audio retained only on the server
+assets/star-island*.wav
