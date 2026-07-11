@@ -1,0 +1,16 @@
+# Runtime / local data
+.env
+*.env
+data/
+*.db
+*.sqlite*
+__pycache__/
+*.py[cod]
+
+# Local backups and generated files
+*.bak*
+.DS_Store
+screenshots/
+
+# Original/lossless generated audio retained only on the server
+assets/*.wav
